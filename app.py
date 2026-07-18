@@ -55,6 +55,17 @@ st.write(
 )
 st.warning("⚠️ Student portfolio project — NOT a diagnostic tool. Do not use for real medical decisions.")
 
+with st.expander("View all 20 categories this model can classify"):
+    for name in CLASS_NAMES:
+        st.write(f"- {name}")
+
+st.caption(
+    "**Dataset:** [Massive Skin Disease Balanced Dataset](https://www.kaggle.com/datasets/muhammadabdulsami/massive-skin-disease-balanced-dataset) "
+    "on Kaggle, by Muhammad Abdul Sami. I did not create this dataset.  \n"
+    "**Model:** ConvNeXt-Tiny (via the `timm` library), pretrained on ImageNet and fine-tuned by me on the above dataset. "
+    "I did not create the ConvNeXt architecture or its original pretrained weights."
+)
+
 uploaded_file = st.file_uploader("Upload a skin photo", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
