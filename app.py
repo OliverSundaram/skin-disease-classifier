@@ -4,7 +4,6 @@ import timm
 from torchvision import transforms
 from PIL import Image
 
-# ---- Exact class order from os.listdir("data/train") at training time ----
 CLASS_NAMES = [
     'Acne And Rosacea Photos', 'Atopic Dermatitis Photos', 'Ba  Cellulitis',
     'Ba Impetigo', 'Benign', 'Bullous Disease Photos',
@@ -14,13 +13,12 @@ CLASS_NAMES = [
     'Vascular Tumors', 'Vasculitis Photos', 'Vi Chickenpox', 'Vi Shingles',
     'Warts Molluscum And Other Viral Infections'
 ]
-NUM_CLASSES = len(CLASS_NAMES)  # 20
+NUM_CLASSES = len(CLASS_NAMES)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 @st.cache_resource
 def load_model():
-    # pretrained=False: we're loading YOUR trained weights, not the original ImageNet ones
     model = timm.create_model("convnext_tiny", pretrained=False, num_classes=NUM_CLASSES)
     state_dict = torch.load("skin_disease_model.pth", map_location=device)
     model.load_state_dict(state_dict)
@@ -30,7 +28,6 @@ def load_model():
 
 model = load_model()
 
-# Matches train_loop.py's test_transform exactly (no augmentation at inference time)
 preprocess = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
@@ -41,13 +38,12 @@ preprocess = transforms.Compose([
 def predict(image):
     image = image.convert("RGB")
     tensor = preprocess(image).unsqueeze(0).to(device)
-    with torch.no_grad():
+    with torch.inference_mode():
         outputs = model(tensor)
         probabilities = torch.softmax(outputs, dim=1)[0]
     return {CLASS_NAMES[i]: float(probabilities[i]) for i in range(NUM_CLASSES)}
 
 
-# ---------------- UI ----------------
 st.title("Skin Disease Classifier")
 st.write(
     "Upload a photo of a skin condition to get the model's top predictions "
